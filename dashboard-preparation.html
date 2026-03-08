@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard PRÉPARATION — Logistique Toulouse</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #f0f2f5;
+  --dark: #0f1623;
+  --panel: #ffffff;
+  --panel2: #f8f9fb;
+  --border: #e4e8ef;
+  --blue: #1a56ff;
+  --blue-l: #e8edff;
+  --green: #00c48c;
+  --green-l: #e0faf3;
+  --orange: #ff8c00;
+  --orange-l: #fff3e0;
+  --red: #ff3b5c;
+  --red-l: #ffe8ec;
+  --purple: #7c3aed;
+  --purple-l: #ede9fe;
+  --yellow: #eab308;
+  --yellow-l: #fefce8;
+  --muted: #8896ab;
+  --text: #1a2333;
+  --font: 'Barlow', sans-serif;
+  --font-c: 'Barlow Condensed', sans-serif;
+  --font-d: 'Bebas Neue', sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; }
+
+/* ── TOPBAR ── */
+.topbar {
+  background: var(--dark); color: white;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 28px; height: 56px; position: sticky; top: 0; z-index: 200;
+}
+.brand { font-family: var(--font-d); font-size: 1.7rem; letter-spacing: 2px; }
+.brand em { color: var(--blue); font-style: normal; }
+.topbar-meta { font-size: 0.72rem; color: rgba(255,255,255,.4); letter-spacing: 1.5px; text-transform: uppercase; margin-left: 18px; }
+.clock { font-family: var(--font-d); font-size: 1.5rem; letter-spacing: 3px; color: var(--blue); }
+.live { display:flex;align-items:center;gap:6px;font-size:.7rem;color:rgba(255,255,255,.4);letter-spacing:1px;text-transform:uppercase; }
+.live::before { content:'';width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:blink 2s infinite; }
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── ALERT ── */
+.alert { background:var(--red);color:white;padding:9px 24px;font-size:.8rem;font-weight:600;display:flex;align-items:center;gap:12px; }
+.alert button { margin-left:auto;background:rgba(255,255,255,.2);border:none;color:white;padding:3px 10px;border-radius:4px;cursor:pointer;font-size:.72rem; }
+
+/* ── PAGE ── */
+.page { padding: 18px 22px; max-width: 1720px; margin: 0 auto; }
+
+/* ── SECTION HEADER ── */
+.sh { font-family:var(--font-c);font-size:.7rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:8px; }
+.sh::after { content:'';flex:1;height:1px;background:var(--border); }
+
+/* ── KPI STRIP ── */
+.kpis { display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-bottom:18px;animation:up .4s ease both; }
+.kpi { background:var(--panel);border:1px solid var(--border);border-radius:11px;padding:14px 16px;position:relative;overflow:hidden;transition:box-shadow .2s,transform .2s; }
+.kpi:hover { box-shadow:0 4px 18px rgba(0,0,0,.07);transform:translateY(-1px); }
+.kpi-bar { position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:11px 0 0 11px; }
+.kpi-ic { position:absolute;right:10px;top:10px;width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px; }
+.kpi-lbl { font-size:.66rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:4px; }
+.kpi-val { font-family:var(--font-d);font-size:2.2rem;line-height:1;letter-spacing:1px; }
+.kpi-sub { font-size:.7rem;color:var(--muted);margin-top:3px; }
+.k-blue .kpi-bar{background:var(--blue)} .k-blue .kpi-val{color:var(--blue)} .k-blue .kpi-ic{background:var(--blue-l)}
+.k-green .kpi-bar{background:var(--green)} .k-green .kpi-val{color:var(--green)} .k-green .kpi-ic{background:var(--green-l)}
+.k-orange .kpi-bar{background:var(--orange)} .k-orange .kpi-val{color:var(--orange)} .k-orange .kpi-ic{background:var(--orange-l)}
+.k-red .kpi-bar{background:var(--red)} .k-red .kpi-val{color:var(--red)} .k-red .kpi-ic{background:var(--red-l)}
+.k-purple .kpi-bar{background:var(--purple)} .k-purple .kpi-val{color:var(--purple)} .k-purple .kpi-ic{background:var(--purple-l)}
+.k-yellow .kpi-bar{background:var(--yellow)} .k-yellow .kpi-val{color:var(--yellow)} .k-yellow .kpi-ic{background:var(--yellow-l)}
+.k-dark .kpi-bar{background:var(--dark)} .k-dark .kpi-val{color:var(--dark)} .k-dark .kpi-ic{background:#f0f2f5}
+
+/* ── MAIN GRID ── */
+.grid3 { display:grid;grid-template-columns:290px 1fr 270px;gap:14px;margin-bottom:14px;animation:up .5s ease both; }
+.grid3b { display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px;animation:up .6s ease both; }
+
+/* ── PANEL ── */
+.panel { background:var(--panel);border:1px solid var(--border);border-radius:11px;padding:16px; }
+.ptitle { font-family:var(--font-c);font-size:.72rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between; }
+.ptitle-l { display:flex;align-items:center;gap:7px; }
+.ptitle span.lbl { color:var(--text); }
+.badge { font-family:var(--font-c);font-size:.66rem;font-weight:700;padding:2px 8px;border-radius:12px;background:var(--bg);color:var(--muted); }
+
+/* ── PRESENCE BAR ── */
+.pbar-wrap { margin-bottom:12px; }
+.pbar { height:9px;background:var(--border);border-radius:9px;overflow:hidden;display:flex;margin-bottom:6px; }
+.pbar-seg { height:100%;transition:width 1s ease; }
+.pbar-legend { display:flex;gap:12px;flex-wrap:wrap; }
+.pleg { display:flex;align-items:center;gap:5px;font-size:.7rem;color:var(--muted); }
+.pleg-dot { width:8px;height:8px;border-radius:2px;flex-shrink:0; }
+
+/* ── TEAM LIST ── */
+.team-scroll { max-height:380px;overflow-y:auto; }
+.team-scroll::-webkit-scrollbar { width:3px; }
+.team-scroll::-webkit-scrollbar-thumb { background:var(--border);border-radius:3px; }
+.mbr { display:flex;align-items:center;gap:8px;padding:8px 9px;border-radius:8px;transition:background .15s;cursor:default; }
+.mbr:hover { background:var(--panel2); }
+.av { width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-c);font-size:.68rem;font-weight:700;flex-shrink:0; }
+.mbr-name { font-size:.8rem;font-weight:500;flex:1;line-height:1.3; }
+.chip { font-size:.6rem;font-weight:700;letter-spacing:.6px;padding:3px 7px;border-radius:4px;text-transform:uppercase;white-space:nowrap; }
+.ch-pres { background:var(--green-l);color:var(--green); }
+.ch-abs { background:var(--red-l);color:var(--red); }
+.ch-vac { background:var(--blue-l);color:var(--blue); }
+.ch-cong { background:var(--orange-l);color:var(--orange); }
+.ch-terr { background:var(--purple-l);color:var(--purple); }
+.ch-demi { background:var(--yellow-l);color:var(--yellow); }
+
+/* ── SEARCH ── */
+.srch { position:relative;margin-bottom:10px; }
+.srch input { width:100%;background:var(--panel2);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px 7px 30px;font-family:var(--font);font-size:.8rem;color:var(--text);outline:none;transition:border-color .2s; }
+.srch input:focus { border-color:var(--blue); }
+.srch::before { content:'🔍';position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:.72rem; }
+
+/* ── TABS ── */
+.tabs { display:flex;border-bottom:2px solid var(--border);margin-bottom:12px; }
+.tab { font-size:.72rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:7px 14px;cursor:pointer;color:var(--muted);border:none;border-bottom:2px solid transparent;margin-bottom:-2px;background:none;font-family:var(--font);transition:all .15s;white-space:nowrap; }
+.tab.on { color:var(--blue);border-bottom-color:var(--blue); }
+.tc { display:none; }
+.tc.on { display:block; }
+
+/* ── TABLES ── */
+.tscroll { overflow:auto;max-height:320px; }
+.tscroll::-webkit-scrollbar{width:3px;height:3px} .tscroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+table { width:100%;border-collapse:collapse; }
+th { font-size:.63rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);text-align:left;padding:6px 8px;border-bottom:2px solid var(--border);white-space:nowrap; }
+td { padding:9px 8px;font-size:.8rem;border-bottom:1px solid var(--border);vertical-align:middle; }
+tr:last-child td { border-bottom:none; }
+tbody tr:hover td { background:var(--panel2); }
+
+.sf-btn { background:var(--panel2);border:1px solid var(--border);color:var(--muted);border-radius:20px;padding:3px 12px;font-size:.7rem;font-weight:700;cursor:pointer;transition:all .15s;letter-spacing:.3px; }
+.sf-btn:hover { background:var(--blue-l);color:var(--blue);border-color:var(--blue); }
+.sf-btn.sf-on { background:var(--blue);color:white;border-color:var(--blue); }
+.tn { font-family:var(--font-c);font-weight:700;font-size:.76rem;color:var(--blue);background:var(--blue-l);padding:2px 7px;border-radius:4px;white-space:nowrap; }
+.state-open { display:inline-flex;align-items:center;gap:4px;font-size:.66rem;font-weight:700;text-transform:uppercase;color:var(--orange);background:var(--orange-l);padding:3px 8px;border-radius:4px; }
+.state-open::before { content:'';width:5px;height:5px;border-radius:50%;background:var(--orange);animation:blink 1.5s infinite; }
+.dl-ok{color:var(--green);font-weight:600} .dl-warn{color:var(--orange);font-weight:600} .dl-urg{color:var(--red);font-weight:600}
+.ec-term{background:var(--green-l);color:var(--green)} .ec-bloc{background:var(--red-l);color:var(--red)} .ec-enc{background:var(--blue-l);color:var(--blue)}
+.sp-bout{background:var(--green-l);color:var(--green)} .sp-piece{background:var(--orange-l);color:var(--orange)} .sp-rep{background:var(--red-l);color:var(--red)}
+.ec,.sp{font-size:.63rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:3px 7px;border-radius:4px}
+
+/* ── PRIORITY ── */
+.priolist { display:flex;flex-direction:column;gap:7px; }
+.prio { display:flex;align-items:flex-start;gap:9px;padding:10px 11px;background:var(--panel2);border-radius:8px;border-left:3px solid var(--border);transition:border-color .2s; }
+.prio:hover{border-left-color:var(--red)}
+.pnum { font-family:var(--font-d);font-size:1.3rem;line-height:1;flex-shrink:0; }
+.pbody { flex:1; }
+.ptit { font-size:.8rem;font-weight:600;margin-bottom:2px; }
+.pmeta { font-size:.68rem;color:var(--muted); }
+.pbadge { font-size:.6rem;font-weight:700;padding:2px 7px;border-radius:4px;text-transform:uppercase;white-space:nowrap;flex-shrink:0; }
+
+/* ── PROG BAR ── */
+.progitem { margin-bottom:11px; }
+.progh { display:flex;justify-content:space-between;margin-bottom:4px;font-size:.76rem; }
+.progbar { height:7px;background:var(--border);border-radius:7px;overflow:hidden; }
+.progfill { height:100%;border-radius:7px;transition:width 1.2s ease; }
+
+/* ── CONNECT PANEL ── */
+.connect-panel {
+  background: linear-gradient(135deg, #0f1623 0%, #1a2645 100%);
+  border: 1px solid rgba(26,86,255,.3);
+  border-radius:14px; padding:22px 26px; margin-bottom:14px;
+  animation:up .4s ease both;
+  position:relative;overflow:hidden;
+}
+.connect-panel::before {
+  content:'';position:absolute;top:-40px;right:-40px;
+  width:180px;height:180px;border-radius:50%;
+  background:radial-gradient(circle,rgba(26,86,255,.15),transparent 70%);
+  pointer-events:none;
+}
+.cp-title { font-family:var(--font-d);font-size:1.4rem;letter-spacing:2px;color:white;margin-bottom:4px; }
+.cp-sub { font-size:.78rem;color:rgba(255,255,255,.5);margin-bottom:18px; }
+.cp-grid { display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px; }
+.cp-field label { display:block;font-size:.66rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:5px; }
+.cp-field input, .cp-field select {
+  width:100%;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.12);
+  border-radius:8px;color:white;padding:9px 12px;font-family:var(--font);font-size:.82rem;outline:none;transition:border-color .2s;
+}
+.cp-field input:focus,.cp-field select:focus { border-color:var(--blue); }
+.cp-field input::placeholder { color:rgba(255,255,255,.25); }
+.cp-field select option { background:#1a2645;color:white; }
+.cp-btns { display:flex;gap:10px;align-items:center; }
+.btn-connect { background:var(--blue);color:white;border:none;padding:10px 22px;border-radius:8px;font-family:var(--font-d);font-size:1rem;letter-spacing:1px;cursor:pointer;transition:opacity .2s; }
+.btn-connect:hover { opacity:.85; }
+.btn-demo { background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.12);padding:9px 18px;border-radius:8px;font-family:var(--font);font-size:.8rem;cursor:pointer;transition:background .2s; }
+.btn-demo:hover { background:rgba(255,255,255,.14); }
+.cp-status { font-size:.76rem;margin-top:10px;padding:8px 12px;border-radius:7px; }
+.cs-ok { background:rgba(0,196,140,.1);color:var(--green);border:1px solid rgba(0,196,140,.2); }
+.cs-err { background:rgba(255,59,92,.1);color:var(--red);border:1px solid rgba(255,59,92,.2); }
+.cs-wait { background:rgba(26,86,255,.1);color:var(--blue);border:1px solid rgba(26,86,255,.2); }
+
+/* ── HOW TO ── */
+.howto { background:var(--panel);border:1px solid var(--border);border-radius:11px;padding:18px 22px;margin-bottom:14px; }
+.howto-title { font-family:var(--font-d);font-size:1.1rem;letter-spacing:1.5px;color:var(--text);margin-bottom:12px; }
+.steps { display:grid;grid-template-columns:repeat(4,1fr);gap:10px; }
+.step { background:var(--panel2);border-radius:9px;padding:12px;border-left:3px solid var(--blue); }
+.step-n { font-family:var(--font-d);font-size:1.6rem;color:var(--blue);line-height:1;margin-bottom:4px; }
+.step-t { font-size:.8rem;font-weight:600;margin-bottom:3px; }
+.step-d { font-size:.72rem;color:var(--muted);line-height:1.4; }
+.step code { background:var(--border);padding:1px 5px;border-radius:3px;font-size:.7rem;color:var(--text); }
+
+@media(max-width:1300px){ .grid3{grid-template-columns:260px 1fr} .grid3 .panel:last-child{grid-column:1/-1} .kpis{grid-template-columns:repeat(4,1fr)} .cp-grid{grid-template-columns:1fr 1fr} .steps{grid-template-columns:1fr 1fr} }
+@media(max-width:900px){ .grid3,.grid3b{grid-template-columns:1fr} .kpis{grid-template-columns:repeat(2,1fr)} }
+</style>
+</head>
+<body>
+
+<div class="alert" id="alertBar">
+  ⚠️ <strong>3 PCs bloqués</strong> — BIOS verrouillé (Continental) · Intervention requise
+  <button onclick="this.parentElement.style.display='none'">✕ Fermer</button>
+</div>
+
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:16px">
+    <img src="data:image/png;base64,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" style="height:38px;object-fit:contain;border-radius:6px;padding:3px 8px;background:white" alt="envoi">
+    <div style="width:1px;height:28px;background:rgba(255,255,255,.12)"></div>
+    <div class="topbar-meta">Toulouse · Airbus · Logistique IT</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:20px">
+    <div class="live">Live</div>
+    <button onclick="toggleAdmin()" id="btnAdmin" title="Mode admin" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);border-radius:6px;padding:5px 10px;cursor:pointer;font-size:.75rem">🔒</button>
+    <div style="text-align:right">
+      <div class="clock" id="clk">--:--:--</div>
+      <div style="font-size:.66rem;color:rgba(255,255,255,.3);letter-spacing:1px;text-transform:uppercase" id="dateLbl"></div>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+
+<!-- ═══ HOW TO CONNECT ═══ -->
+<div class="howto" id="howtoBox" style="display:none">
+  <div class="howto-title">🔗 COMMENT AFFICHER ET CONNECTER LE DASHBOARD</div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-n">1</div>
+      <div class="step-t">Ouvrir le fichier HTML</div>
+      <div class="step-d">Télécharge ce fichier sur ton PC. Double-clique dessus → il s'ouvre dans Chrome ou Edge. C'est tout — aucun serveur nécessaire.</div>
+    </div>
+    <div class="step">
+      <div class="step-n">2</div>
+      <div class="step-t">Partager tes Google Sheets</div>
+      <div class="step-d">Dans chaque Sheet → <code>Partager</code> → <code>Tout le monde avec le lien</code> → rôle <code>Lecteur</code>. Copie l'ID dans l'URL entre <code>/d/</code> et <code>/edit</code>.</div>
+    </div>
+    <div class="step">
+      <div class="step-n">3</div>
+      <div class="step-t">Coller les IDs ci-dessous</div>
+      <div class="step-d">Remplis les 3 champs dans le panneau de connexion ci-dessous avec les IDs de tes Sheets. Clique sur <strong>Connecter</strong>.</div>
+    </div>
+    <div class="step">
+      <div class="step-n">4</div>
+      <div class="step-t">Synchronisation auto</div>
+      <div class="step-d">Le dashboard se met à jour automatiquement toutes les minutes. Tu peux aussi forcer une synchro avec le bouton <strong>↺ Sync</strong> dans la barre du haut.</div>
+    </div>
+  </div>
+  <div style="margin-top:10px;font-size:.72rem;color:var(--muted);display:flex;align-items:center;gap:8px">
+    <span>💡 Pour les absences :</span>
+    <span style="background:var(--red-l);color:var(--red);padding:2px 7px;border-radius:4px;font-weight:600">A = Absent</span>
+    <span style="background:var(--orange-l);color:var(--orange);padding:2px 7px;border-radius:4px;font-weight:600">C = Congé</span>
+    <span style="background:var(--purple-l);color:var(--purple);padding:2px 7px;border-radius:4px;font-weight:600">T = Terrain</span>
+    <span style="background:var(--blue-l);color:var(--blue);padding:2px 7px;border-radius:4px;font-weight:600">V = Vacances</span>
+    <span style="color:var(--muted)">· Vide = Présent</span>
+    <button onclick="document.getElementById('howtoBox').style.display='none'" style="margin-left:auto;background:var(--border);border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:.72rem">Masquer ce guide</button>
+  </div>
+</div>
+
+<!-- ═══ CONNECT PANEL ═══ -->
+<div class="connect-panel" id="connectPanel" style="display:none">
+  <div class="cp-title">⚡ CONNEXION GOOGLE SHEETS</div>
+  <div class="cp-sub">Colle les IDs de tes 3 Sheets — l'ID est dans l'URL de chaque fichier : docs.google.com/spreadsheets/d/<strong style="color:white">[CET ID]</strong>/edit</div>
+  <div class="cp-grid">
+    <div class="cp-field">
+      <label>📅 Sheet Calendrier (Présences)</label>
+      <input id="sid-cal" placeholder="Ex: 1BxiMVs0XRA5nFMdKvBdBZjgmUU..." />
+    </div>
+    <div class="cp-field">
+      <label>🔧 Sheet Préparation PC</label>
+      <input id="sid-pc" placeholder="Ex: 1BxiMVs0XRA5nFMdKvBdBZjgmUU..." />
+    </div>
+    <div class="cp-field">
+      <label>🎫 Sheet Tickets Airbus (Suivi Request)</label>
+      <input id="sid-airbus" placeholder="Ex: 1BxiMVs0XRA5nFMdKvBdBZjgmUU..." />
+    </div>
+  </div>
+  <div class="cp-grid" style="margin-bottom:0">
+    <div class="cp-field">
+      <label>Onglet Calendrier</label>
+      <input id="stab-cal" value="Calendrier 2026" placeholder="Nom de l'onglet" />
+    </div>
+    <div class="cp-field">
+      <label>Onglet Préparation PC</label>
+      <input id="stab-pc" value="Feuille 1" placeholder="Nom de l'onglet" />
+    </div>
+    <div class="cp-field">
+      <label>Rafraîchissement auto</label>
+      <select id="srefresh">
+        <option value="30000">Toutes les 30 secondes</option>
+        <option value="60000" selected>Toutes les minutes</option>
+        <option value="300000">Toutes les 5 minutes</option>
+        <option value="0">Manuel uniquement</option>
+      </select>
+    </div>
+  </div>
+  <div class="cp-btns" style="margin-top:14px">
+    <button class="btn-connect" onclick="connectSheets()">🔗 Connecter les Sheets</button>
+    <button class="btn-demo" onclick="loadDemo()">👁 Charger les données de démo</button>
+    <button class="btn-demo" onclick="refreshAll()" id="btnSync" style="display:none">↺ Sync maintenant</button>
+  </div>
+  <div class="cp-status cs-wait" id="cpStatus">⏳ En attente — clique sur "Connecter" ou "Démo" pour charger les données</div>
+</div>
+
+<!-- ═══ KPI STRIP ═══ -->
+<div class="sh">📊 Indicateurs du jour</div>
+<div class="kpis">
+  <div class="kpi k-green"><div class="kpi-bar"></div><div class="kpi-ic">✅</div><div class="kpi-lbl">Présents</div><div class="kpi-val" id="kv-pres">—</div><div class="kpi-sub">aujourd'hui</div></div>
+  <div class="kpi k-red"><div class="kpi-bar"></div><div class="kpi-ic">❌</div><div class="kpi-lbl">Absents</div><div class="kpi-val" id="kv-abs">—</div><div class="kpi-sub" id="ks-abs">—</div></div>
+  <div class="kpi k-blue"><div class="kpi-bar"></div><div class="kpi-ic">🏖</div><div class="kpi-lbl">Vacances/Congé</div><div class="kpi-val" id="kv-vac">—</div><div class="kpi-sub">hors bureau</div></div>
+  <div class="kpi k-orange"><div class="kpi-bar"></div><div class="kpi-ic">🎫</div><div class="kpi-lbl">Tickets Airbus</div><div class="kpi-val" id="kv-tickets">2</div><div class="kpi-sub">ouverts</div></div>
+  <div class="kpi k-green"><div class="kpi-bar"></div><div class="kpi-ic">💻</div><div class="kpi-lbl">PCs terminés</div><div class="kpi-val">509</div><div class="kpi-sub">sur 513 (99.2%)</div></div>
+  <div class="kpi k-red"><div class="kpi-bar"></div><div class="kpi-ic">🚨</div><div class="kpi-lbl">PCs bloqués</div><div class="kpi-val">3</div><div class="kpi-sub">BIOS verrouillé</div></div>
+  <div class="kpi k-purple"><div class="kpi-bar"></div><div class="kpi-ic">🔩</div><div class="kpi-lbl">Pour pièces</div><div class="kpi-val">40</div><div class="kpi-sub">cannibalisés</div></div>
+</div>
+
+<!-- ═══ MAIN GRID ═══ -->
+<div class="sh">🗂 Vue d'ensemble</div>
+<div class="grid3">
+
+  <!-- TEAM -->
+  <div class="panel">
+    <div class="ptitle"><div class="ptitle-l">👥 <span class="lbl">Équipe</span></div><span class="badge" id="teamBadge">—</span></div>
+    <div class="pbar-wrap">
+      <div class="pbar">
+        <div class="pbar-seg" id="pb-pres" style="background:var(--green);width:0%"></div>
+        <div class="pbar-seg" id="pb-abs" style="background:var(--red);width:0%"></div>
+        <div class="pbar-seg" id="pb-vac" style="background:var(--blue);width:0%"></div>
+      </div>
+      <div class="pbar-legend">
+        <div class="pleg"><div class="pleg-dot" style="background:var(--green)"></div><span id="lg-pres">—</span> présents</div>
+        <div class="pleg"><div class="pleg-dot" style="background:var(--red)"></div><span id="lg-abs">—</span> absents</div>
+        <div class="pleg"><div class="pleg-dot" style="background:var(--blue)"></div><span id="lg-vac">—</span> vacances/congé</div>
+      </div>
+    </div>
+    <div class="srch"><input placeholder="Rechercher..." oninput="filterTeam(this.value)"></div>
+    <div class="team-scroll" id="teamList">
+      <div style="color:var(--muted);font-size:.8rem;text-align:center;padding:20px">Charge les données pour voir l'équipe</div>
+    </div>
+  </div>
+
+  <!-- CENTER TABS -->
+  <div class="panel">
+    <div class="tabs">
+      <button class="tab on" onclick="showTab('t-airbus',this)">🎫 Tickets Airbus</button>
+      <button class="tab" onclick="showTab('t-pc',this)">🔧 Préparation PC</button>
+      <button class="tab" onclick="showTab('t-bloc',this)">🚨 Bloqués (3)</button>
+    </div>
+
+    <!-- AIRBUS -->
+    <div class="tc on" id="t-airbus">
+      <div id="site-filters" style="display:flex;flex-wrap:wrap;gap:6px;padding:10px 4px 6px;align-items:center">
+        <span style="font-size:.7rem;color:var(--muted);font-weight:600;letter-spacing:.5px">SITE :</span>
+        <button onclick="filterSite('tous')" class="sf-btn sf-on" id="sf-tous">Tous</button>
+      </div>
+      <div class="tscroll">
+        <table><thead><tr><th>Ticket</th><th>Description</th><th>Pour qui</th><th>Site</th><th>RDV / Appointment</th><th>État</th></tr></thead>
+        <tbody id="tb-airbus"></tbody></table>
+      </div>
+
+      <!-- STATS AIRBUS -->
+      <div id="airbus-stats" style="display:none;margin-top:16px;border-top:1px solid var(--border);padding-top:14px">
+        <div style="font-family:var(--font-c);font-size:.72rem;font-weight:700;letter-spacing:1.5px;color:var(--muted);margin-bottom:12px">📊 STATISTIQUES TICKETS</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
+
+          <!-- Mois actuel vs précédent -->
+          <div style="background:var(--panel2);border-radius:10px;padding:12px">
+            <div style="font-size:.68rem;font-weight:700;color:var(--muted);letter-spacing:.8px;margin-bottom:10px">📅 CE MOIS VS MOIS DERNIER</div>
+            <div style="display:flex;align-items:flex-end;gap:16px;justify-content:center;height:80px" id="stat-mois-bars"></div>
+            <div id="stat-mois-labels" style="display:flex;gap:16px;justify-content:center;margin-top:6px;font-size:.65rem;color:var(--muted)"></div>
+          </div>
+
+          <!-- Répartition HCL/ENVOI/ECRANS -->
+          <div style="background:var(--panel2);border-radius:10px;padding:12px">
+            <div style="font-size:.68rem;font-weight:700;color:var(--muted);letter-spacing:.8px;margin-bottom:10px">🍕 RÉPARTITION PAR ONGLET</div>
+            <div style="display:flex;flex-direction:column;gap:6px" id="stat-onglets"></div>
+          </div>
+
+          <!-- Par site -->
+          <div style="background:var(--panel2);border-radius:10px;padding:12px">
+            <div style="font-size:.68rem;font-weight:700;color:var(--muted);letter-spacing:.8px;margin-bottom:10px">📍 TICKETS PAR SITE</div>
+            <div style="display:flex;flex-direction:column;gap:5px" id="stat-sites"></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- PC TABLE -->
+    <div class="tc" id="t-pc">
+      <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+        <button class="tab on" style="font-size:.68rem;padding:4px 10px;border-radius:20px;border:1.5px solid var(--border)" onclick="filterPC('tous',this)">Tous (513)</button>
+        <button class="tab" style="font-size:.68rem;padding:4px 10px;border-radius:20px;border:1.5px solid var(--border)" onclick="filterPC('Terminé',this)">Terminés (509)</button>
+        <button class="tab" style="font-size:.68rem;padding:4px 10px;border-radius:20px;border:1.5px solid var(--border)" onclick="filterPC('Bloqué',this)">Bloqués (3)</button>
+      </div>
+      <div class="srch"><input placeholder="Rechercher n° série, modèle..." oninput="searchPC(this.value)"></div>
+      <div class="tscroll">
+        <table><thead><tr><th>N° Envoi</th><th>Modèle</th><th>N° Série</th><th>Technicien</th><th>Étape</th><th>Statut</th><th>Provenance</th><th>Remarque</th><th>Sortie</th></tr></thead>
+        <tbody id="tb-pc"></tbody></table>
+      </div>
+    </div>
+
+    <!-- BLOQUÉS -->
+    <div class="tc" id="t-bloc">
+      <div style="background:var(--red-l);border:1px solid var(--red);border-radius:8px;padding:11px 14px;margin-bottom:12px">
+        <div style="font-weight:700;color:var(--red);margin-bottom:3px">🚨 3 PCs bloqués — action requise</div>
+        <div style="font-size:.78rem">BIOS verrouillé · Source : Continental · Responsable : Merwan KHENAK<br>Action : contacter Continental pour déverrouillage ou remplacement.</div>
+      </div>
+      <table><thead><tr><th>N° Envoi</th><th>Modèle</th><th>N° Série</th><th>Problème</th><th>Depuis</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tn" style="background:var(--red-l);color:var(--red)">E2503314</span></td><td>HP EliteBook 850 G5</td><td style="font-size:.7rem;color:var(--muted);font-family:monospace">5CG9447XZH</td><td style="color:var(--red);font-weight:600">BIOS Bloqué</td><td style="color:var(--muted);font-size:.75rem">27/10/2025</td></tr>
+        <tr><td><span class="tn" style="background:var(--red-l);color:var(--red)">E2503311</span></td><td>HP EliteBook 850 G6</td><td style="font-size:.7rem;color:var(--muted);font-family:monospace">5CG9447YMC</td><td style="color:var(--red);font-weight:600">BIOS Bloqué</td><td style="color:var(--muted);font-size:.75rem">28/10/2025</td></tr>
+        <tr><td><span class="tn" style="background:var(--red-l);color:var(--red)">E2503309</span></td><td>HP EliteBook 850 G6</td><td style="font-size:.7rem;color:var(--muted);font-family:monospace">5CG9447YLY</td><td style="color:var(--red);font-weight:600">BIOS Bloqué</td><td style="color:var(--muted);font-size:.75rem">28/10/2025</td></tr>
+      </tbody></table>
+    </div>
+  </div>
+
+  <!-- PRIORITIES -->
+  <div class="panel">
+    <div class="ptitle"><div class="ptitle-l">🎯 <span class="lbl">Priorités du jour</span></div></div>
+    <div class="priolist" id="prioList"></div>
+  </div>
+</div>
+
+<!-- ═══ BOTTOM GRID ═══ -->
+<div class="sh">📈 Statistiques</div>
+<div class="grid3b">
+  <div class="panel">
+    <div class="ptitle"><div class="ptitle-l">📅 <span class="lbl">PCs traités par mois</span></div></div>
+    <div style="position:relative;height:200px"><canvas id="chMois"></canvas></div>
+  </div>
+  <div class="panel">
+    <div class="ptitle"><div class="ptitle-l">💻 <span class="lbl">Top modèles</span></div></div>
+    <div style="position:relative;height:200px"><canvas id="chModeles"></canvas></div>
+  </div>
+  <div class="panel">
+    <div class="ptitle"><div class="ptitle-l">👤 <span class="lbl">Charge techniciens</span></div></div>
+    <div class="progitem">
+      <div class="progh"><span style="font-weight:600">Merwan KHENAK</span><span style="color:var(--muted)">414 PCs <span style="color:var(--green)">· 100% termin.</span></span></div>
+      <div class="progbar"><div class="progfill" style="width:80.7%;background:var(--blue)"></div></div>
+      <div style="font-size:.66rem;color:var(--muted);margin-top:2px">80.7% du volume</div>
+    </div>
+    <div class="progitem">
+      <div class="progh"><span style="font-weight:600">Jean-Pierre SECHAO</span><span style="color:var(--muted)">99 PCs <span style="color:var(--green)">· 96% termin.</span></span></div>
+      <div class="progbar"><div class="progfill" style="width:19.3%;background:var(--purple)"></div></div>
+      <div style="font-size:.66rem;color:var(--muted);margin-top:2px">19.3% du volume</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:14px">
+      <div style="background:var(--green-l);border-radius:8px;padding:9px;text-align:center"><div style="font-family:var(--font-d);font-size:1.7rem;color:var(--green)">469</div><div style="font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:var(--green)">Boutique</div></div>
+      <div style="background:var(--orange-l);border-radius:8px;padding:9px;text-align:center"><div style="font-family:var(--font-d);font-size:1.7rem;color:var(--orange)">40</div><div style="font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:var(--orange)">Pièces</div></div>
+      <div style="background:var(--red-l);border-radius:8px;padding:9px;text-align:center"><div style="font-family:var(--font-d);font-size:1.7rem;color:var(--red)">3</div><div style="font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:var(--red)">Bloqués</div></div>
+      <div style="background:var(--purple-l);border-radius:8px;padding:9px;text-align:center"><div style="font-family:var(--font-d);font-size:1.7rem;color:var(--purple)">1</div><div style="font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:var(--purple)">À traiter</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TRELLO PLANNING SEMAINE ═══ -->
+<div class="sh" style="margin-top:4px">📋 Planning de la semaine — Trello</div>
+<div class="panel" style="margin-bottom:14px;animation:up .7s ease both">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="background:#0052CC;color:white;border-radius:6px;padding:4px 10px;font-family:var(--font-d);font-size:1rem;letter-spacing:1px">TRELLO</div>
+      <span style="font-size:.8rem;color:var(--muted)" id="trelloMeta">Chargement...</span>
+    </div>
+    <button onclick="loadTrello()" style="background:var(--blue-l);color:var(--blue);border:1.5px solid var(--blue);border-radius:7px;padding:6px 14px;font-family:var(--font);font-size:.76rem;font-weight:600;cursor:pointer">↺ Actualiser</button>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px" id="trelloLegend"></div>
+  <div style="display:grid;grid-template-columns:repeat(6,minmax(180px,1fr));gap:10px;overflow-x:auto" id="trelloBoard">
+    <div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--muted);font-size:.85rem">
+      <div style="font-size:1.5rem;margin-bottom:8px">📋</div>
+      Chargement du board Trello en cours...
+    </div>
+  </div>
+  <div style="font-size:.68rem;color:var(--muted);margin-top:10px;text-align:right" id="trelloUpd"></div>
+</div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// REAL DATA FROM YOUR CSV FILES
+// ═══════════════════════════════════════════
+
+// Parsed from CALENDRIER CSV - March 6 2026
+const TEAM_TODAY = [
+  {name:'ABUBAKAROV Said-Ibragim', status:'present'},
+  {name:'ARSTIM Hamid', status:'vacances'},
+  {name:'BENSIKADDOUR Leo', status:'present'},
+  {name:'BERBIGUIER Dominique', status:'absent'},
+  {name:'BOIRARD Davy', status:'present'},
+  {name:'CARPENZANO Bruno', status:'present'},
+  {name:'DESBOURDES Yann', status:'present'},
+  {name:'DESCHAMPS Benjamin', status:'present'},
+  {name:'EL OUADRASSI TLIDI Mohamed', status:'present'},
+  {name:'FERNANDEZ Michel', status:'present'},
+  {name:'FERNEL Herve', status:'present'},
+  {name:'FONTAINE Patrick', status:'absent'},
+  {name:'GARCIA Jocelyn', status:'present'},
+  {name:'GORSKI--FRANCOIS Yoan', status:'present'},
+  {name:'GUEYE Thioro', status:'present'},
+  {name:'HUGUES Thomas', status:'vacances'},
+  {name:'JARRIER Nicolas', status:'present'},
+  {name:'KHENAK Merwan', status:'present'},
+  {name:'LEROY Floryan', status:'present'},
+  {name:'MARCHANDISE Tommy', status:'vacances'},
+  {name:'MARQUEZ Rene', status:'present'},
+  {name:'ONIONS Gerald', status:'vacances'},
+  {name:'OULDHNINI EL HASSANI Hassane', status:'present'},
+  {name:'PHARAMOND Eric', status:'present'},
+  {name:'SUDAN-CHEVALEY Sylvain', status:'present'},
+  {name:'TAIB Abdellah', status:'present'},
+  {name:'VILA Pierre', status:'present'},
+  {name:'BAURENS Léo', status:'present'},
+  {name:'Bergout Romain', status:'present'},
+  {name:'CHAUVIN Matthieu', status:'present'},
+  {name:'MEBREK Ali', status:'present'},
+];
+
+const TICKETS = [
+  {num:'SCTASK5254104',parent:'RITM5599817',desc:'Dell Latitude 5430',action:'Plan and Remove Device',reqBy:'Nolwenn BALIN',reqFor:'Lakshmanan GOPALAKRISHNAN',site:'Toulouse/Saint-Martin',assignedTo:'Jean Pierre SECHAO',breach:'2026-03-19',state:'Open'},
+  {num:'SCTASK5254450',parent:'RITM5600605',desc:'HP EliteBook 835 G8',action:'Plan and Remove Device',reqBy:'Remy LIGNOT',reqFor:'Thierry NIGER',site:'M84 | PISTE VENDEE / P15 V1',assignedTo:'Jean Pierre SECHAO',breach:'2026-03-20',state:'Open'},
+];
+
+const PCS = [
+  {envoi:'E2503320',serie:'5CG8464L16',modele:'HP EliteBook 850 G5',etape:'Terminé',statut:'Boutique',tech:'Merwan KHENAK',prov:'Continental',rem:'',sortie:'04/11/2025'},
+  {envoi:'E2503312',serie:'5CG9447XZM',modele:'HP EliteBook 850 G6',etape:'Terminé',statut:'Boutique',tech:'Merwan KHENAK',prov:'Continental',rem:'',sortie:'04/11/2025'},
+  {envoi:'E2503322',serie:'5CG8464JQ4',modele:'HP EliteBook 850 G5',etape:'Terminé',statut:'Pièces',tech:'Merwan KHENAK',prov:'Continental',rem:'Écran HS',sortie:''},
+  {envoi:'E2503321',serie:'5CG8464KWK',modele:'HP EliteBook 850 G5',etape:'Terminé',statut:'Boutique',tech:'Merwan KHENAK',prov:'Continental',rem:'',sortie:'04/11/2025'},
+  {envoi:'E2503314',serie:'5CG9447XZH',modele:'HP EliteBook 850 G5',etape:'Bloqué',statut:'A réparer',tech:'Merwan KHENAK',prov:'Continental',rem:'Bios Bloqué',sortie:''},
+  {envoi:'E2503311',serie:'5CG9447YMC',modele:'HP EliteBook 850 G6',etape:'Bloqué',statut:'A réparer',tech:'Merwan KHENAK',prov:'Continental',rem:'Bios Bloqué',sortie:''},
+  {envoi:'E2503309',serie:'5CG9447YLY',modele:'HP EliteBook 850 G6',etape:'Bloqué',statut:'Boutique',tech:'Merwan KHENAK',prov:'Continental',rem:'Bios Bloqué',sortie:''},
+  {envoi:'E2503308',serie:'5CG9447YLX',modele:'HP EliteBook 850 G6',etape:'Terminé',statut:'Boutique',tech:'Jean-Pierre SECHAO',prov:'Airbus Protect',rem:'',sortie:'05/11/2025'},
+  {envoi:'E2503307',serie:'5CG9447YLW',modele:'HP EliteBook 830 G5',etape:'Terminé',statut:'Pièces',tech:'Jean-Pierre SECHAO',prov:'UCRS',rem:'Batterie HS',sortie:''},
+  {envoi:'E2503306',serie:'MXL94703TK',modele:'DELL OptiPlex 7060',etape:'Terminé',statut:'Boutique',tech:'Jean-Pierre SECHAO',prov:'Crédit agricole',rem:'',sortie:'06/11/2025'},
+];
+
+const COLORS = ['#1a56ff','#7c3aed','#00c48c','#ff8c00','#ff3b5c','#06b6d4','#84cc16','#f43f5e','#8b5cf6','#ec4899'];
+let teamFilter='', pcFilter='tous', pcSearch='', refreshTimer=null;
+
+// ═══════════════════════════════════════════
+// ADMIN TOGGLE avec mot de passe
+// ═══════════════════════════════════════════
+const ADMIN_PASSWORD = '1234'; // ← change ce code comme tu veux
+let adminVisible = false;
+function toggleAdmin(){
+  if(!adminVisible){
+    const pwd = prompt('🔐 Code admin :');
+    if(pwd !== ADMIN_PASSWORD){
+      if(pwd !== null) alert('❌ Code incorrect');
+      return;
+    }
+  }
+  adminVisible = !adminVisible;
+  document.getElementById('howtoBox').style.display = adminVisible ? 'block' : 'none';
+  document.getElementById('connectPanel').style.display = adminVisible ? 'block' : 'none';
+  document.getElementById('btnAdmin').textContent = adminVisible ? '🔓' : '🔒';
+  document.getElementById('btnAdmin').style.color = adminVisible ? 'var(--blue)' : 'rgba(255,255,255,.5)';
+}
+function tick(){
+  const n=new Date();
+  document.getElementById('clk').textContent=n.toLocaleTimeString('fr-FR');
+  const jours=['DIMANCHE','LUNDI','MARDI','MERCREDI','JEUDI','VENDREDI','SAMEDI'];
+  const mois=['JANVIER','FÉVRIER','MARS','AVRIL','MAI','JUIN','JUILLET','AOÛT','SEPTEMBRE','OCTOBRE','NOVEMBRE','DÉCEMBRE'];
+  const label=`${jours[n.getDay()]} ${n.getDate()} ${mois[n.getMonth()]} ${n.getFullYear()}`;
+  document.getElementById('dateLbl').textContent=label;
+}
+setInterval(tick,1000); tick();
+
+// ═══════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════
+function showTab(id,btn){
+  document.querySelectorAll('.tabs .tab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.tc').forEach(t=>t.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById(id).classList.add('on');
+}
+
+// ═══════════════════════════════════════════
+// TEAM
+// ═══════════════════════════════════════════
+function renderTeam(data){
+  const total=data.length;
+  const pres=data.filter(m=>m.status==='present').length;
+  const demi=data.filter(m=>m.status==='demi').length;
+  const abs=data.filter(m=>m.status==='absent').length;
+  const vac=data.filter(m=>m.status==='vacances'||m.status==='conge').length;
+  const terr=data.filter(m=>m.status==='terrain').length;
+
+  document.getElementById('kv-pres').textContent=pres+demi;
+  document.getElementById('kv-abs').textContent=abs;
+  document.getElementById('kv-vac').textContent=vac+terr;
+  document.getElementById('ks-abs').textContent=data.filter(m=>m.status==='absent').map(m=>m.name.split(' ')[0]).join(', ')||'aucun';
+  document.getElementById('teamBadge').textContent=total+' membres';
+  document.getElementById('lg-pres').textContent=pres+(demi>0?` (+${demi} ½j)`:'');
+  document.getElementById('lg-abs').textContent=abs;
+  document.getElementById('lg-vac').textContent=vac+terr;
+  document.getElementById('pb-pres').style.width=((pres+demi)/total*100)+'%';
+  document.getElementById('pb-abs').style.width=(abs/total*100)+'%';
+  document.getElementById('pb-vac').style.width=((vac+terr)/total*100)+'%';
+
+  const q=teamFilter.toLowerCase();
+  const filtered=q?data.filter(m=>m.name.toLowerCase().includes(q)):data;
+  const chipMap={present:'ch-pres',absent:'ch-abs',vacances:'ch-vac',conge:'ch-cong',terrain:'ch-terr',demi:'ch-demi'};
+  const lblMap={present:'Présent',absent:'Absent',vacances:'Vacances',conge:'Congé',terrain:'Terrain',demi:'½ Journée'};
+
+  document.getElementById('teamList').innerHTML=filtered.map((m,i)=>{
+    const col=COLORS[i%COLORS.length];
+    const ini=m.name.split(' ').filter(w=>w.length>1).map(w=>w[0]).join('').substring(0,2).toUpperCase();
+    return `<div class="mbr">
+      <div class="av" style="background:${col}18;color:${col}">${ini}</div>
+      <div class="mbr-name">${m.name}</div>
+      <span class="chip ${chipMap[m.status]||'ch-pres'}">${lblMap[m.status]||'Présent'}</span>
+    </div>`;
+  }).join('');
+}
+function filterTeam(v){teamFilter=v;renderTeam(TEAM_TODAY);}
+
+// ═══════════════════════════════════════════
+// TICKETS AIRBUS
+// ═══════════════════════════════════════════
+function renderTickets(){
+  const now=new Date();
+  document.getElementById('tb-airbus').innerHTML=TICKETS.map(t=>{
+    const breach=new Date(t.breach);
+    const diff=Math.ceil((breach-now)/86400000);
+    const dc=diff<=3?'dl-urg':diff<=7?'dl-warn':'dl-ok';
+    const dlLabel=diff<=3?`⚠️ J-${diff}`:`J-${diff}`;
+    const site=t.site.length>28?t.site.substring(0,28)+'…':t.site;
+    const ti=t.assignedTo.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+    return `<tr>
+      <td><div><span class="tn">${t.num}</span></div><div style="font-size:.65rem;color:var(--muted);margin-top:2px">${t.parent}</div></td>
+      <td><div style="font-weight:600;font-size:.8rem">${t.desc}</div><div style="font-size:.68rem;color:var(--muted)">${t.action}</div></td>
+      <td><div style="font-size:.78rem">${t.reqFor}</div><div style="font-size:.66rem;color:var(--muted)">via ${t.reqBy}</div></td>
+      <td style="font-size:.72rem;color:var(--muted)" title="${t.site}">${site}</td>
+      <td><div style="display:flex;align-items:center;gap:5px"><div style="width:22px;height:22px;border-radius:50%;background:var(--blue-l);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700">${ti}</div><span style="font-size:.78rem">${t.assignedTo}</span></div></td>
+      <td><span class="${dc}">${dlLabel}</span><div style="font-size:.66rem;color:var(--muted)">${breach.toLocaleDateString('fr-FR')}</div></td>
+      <td><span class="state-open">${t.state}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════
+// PC TABLE
+// ═══════════════════════════════════════════
+function renderPC(){
+  let data=PCS;
+  if(pcFilter!=='tous') data=data.filter(r=>r.etape===pcFilter);
+  if(pcSearch){const q=pcSearch.toLowerCase();data=data.filter(r=>r.envoi.toLowerCase().includes(q)||r.serie.toLowerCase().includes(q)||r.modele.toLowerCase().includes(q));}
+  const ec={Terminé:'ec ec-term',Bloqué:'ec ec-bloc','':'ec ec-enc'};
+  const sp={Boutique:'sp sp-bout',Pièces:'sp sp-piece','A réparer':'sp sp-rep'};
+  const tc={'Merwan KHENAK':'#1a56ff','Jean-Pierre SECHAO':'#7c3aed'};
+  document.getElementById('tb-pc').innerHTML=data.map(r=>{
+    const col=tc[r.tech]||'#8896ab';
+    const ti=r.tech.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+    return `<tr>
+      <td><span class="tn">${r.envoi||'—'}</span></td>
+      <td style="font-weight:500;font-size:.78rem">${r.modele}</td>
+      <td style="font-size:.68rem;color:var(--muted);font-family:monospace">${r.serie||'—'}</td>
+      <td><div style="display:flex;align-items:center;gap:4px"><div style="width:20px;height:20px;border-radius:50%;background:${col}18;color:${col};display:flex;align-items:center;justify-content:center;font-size:.55rem;font-weight:700">${ti}</div><span style="font-size:.75rem">${r.tech}</span></div></td>
+      <td><span class="${ec[r.etape]||'ec ec-enc'}">${r.etape||'En cours'}</span></td>
+      <td><span class="${sp[r.statut]||''}">${r.statut||'—'}</span></td>
+      <td style="font-size:.7rem;color:var(--muted)">${r.prov||'—'}</td>
+      <td style="font-size:.7rem;color:${r.rem?'var(--red)':'var(--muted)'};max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.rem}">${r.rem||'—'}</td>
+      <td style="font-size:.7rem;color:var(--muted)">${r.sortie||'—'}</td>
+    </tr>`;
+  }).join('');
+}
+function filterPC(v,btn){pcFilter=v;document.querySelectorAll('#t-pc .tab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderPC();}
+function searchPC(v){pcSearch=v;renderPC();}
+
+// ═══════════════════════════════════════════
+// PRIORITIES
+// ═══════════════════════════════════════════
+function renderPriorities(){
+  const prios=[
+    {n:1,t:'3 PCs bloqués — BIOS verrouillé Continental',m:'Merwan KHENAK · action immédiate requise',badge:'URGENT',bc:'var(--red)',bl:'var(--red-l)'},
+    {n:2,t:'SCTASK5254104 — Collecte Dell Latitude 5430',m:'Jean Pierre SECHAO · Saint-Martin · Deadline J-13',badge:'AIRBUS',bc:'var(--blue)',bl:'var(--blue-l)'},
+    {n:3,t:'SCTASK5254450 — Collecte HP EliteBook 835 G8',m:'Jean Pierre SECHAO · Piste Vendée · Deadline J-14',badge:'AIRBUS',bc:'var(--blue)',bl:'var(--blue-l)'},
+    {n:4,t:'2 membres absents aujourd\'hui',m:'BERBIGUIER Dominique · FONTAINE Patrick',badge:'EQUIPE',bc:'var(--orange)',bl:'var(--orange-l)'},
+    {n:5,t:'40 PCs en stock pièces à inventorier',m:'Provenance : Continental, Airbus Protect, UCRS',badge:'STOCK',bc:'var(--purple)',bl:'var(--purple-l)'},
+  ];
+  document.getElementById('prioList').innerHTML=prios.map(p=>`
+    <div class="prio">
+      <div class="pnum" style="color:${p.bc}">${p.n}</div>
+      <div class="pbody"><div class="ptit">${p.t}</div><div class="pmeta">${p.m}</div></div>
+      <span class="pbadge" style="background:${p.bl};color:${p.bc}">${p.badge}</span>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════
+// CHARTS
+// ═══════════════════════════════════════════
+function renderCharts(){
+  new Chart(document.getElementById('chMois').getContext('2d'),{type:'bar',data:{labels:['Oct 25','Nov 25','Déc 25','Jan 26','Fév 26'],datasets:[{data:[24,282,98,59,49],backgroundColor:['#1a56ff26','#1a56ffcc','#1a56ff66','#1a56ff40','#1a56ff33'],borderColor:'#1a56ff',borderWidth:1,borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#8896ab',font:{size:10}},grid:{display:false}},y:{ticks:{color:'#8896ab',font:{size:10}},grid:{color:'#f0f2f5'}}}}});
+  new Chart(document.getElementById('chModeles').getContext('2d'),{type:'bar',data:{labels:['Dell OX 7060','HP EB 850 G5','HP EB 830 G5','HP PB 450 G6','HP EB 830 G6','HP EB 840 G6'],datasets:[{data:[196,38,35,34,31,28],backgroundColor:'#1a56ff',borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#8896ab',font:{size:10}},grid:{color:'#f0f2f5'}},y:{ticks:{color:'#8896ab',font:{size:10}},grid:{display:false}}}}});
+}
+
+// ═══════════════════════════════════════════
+// GOOGLE SHEETS CONNECTION
+// ═══════════════════════════════════════════
+const MOIS_FR = ['JANVIER','FEVRIER','MARS','AVRIL','MAI','JUIN','JUILLET','AOUT','SEPTEMBRE','OCTOBRE','NOVEMBRE','DECEMBRE'];
+
+async function fetchGviz(sheetId, tabName){
+  const url=`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(tabName)}`;
+  const res=await fetch(url);
+  if(!res.ok) throw new Error(`HTTP ${res.status}`);
+  const txt=await res.text();
+  return JSON.parse(txt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+}
+
+async function connectSheets(){
+  const sidCal=document.getElementById('sid-cal').value.trim();
+  const sidPc=document.getElementById('sid-pc').value.trim();
+  const sidAirbus=document.getElementById('sid-airbus').value.trim();
+
+  if(!sidCal&&!sidPc&&!sidAirbus){
+    setStatus('⚠️ Colle au moins un ID de Sheet pour te connecter','cs-err');
+    return;
+  }
+  setStatus('⏳ Connexion en cours...','cs-wait');
+  let ok=0, errors=[];
+
+  // ── CALENDRIER (présences) ──
+  if(sidCal){
+    try{
+      const tab=document.getElementById('stab-cal').value.trim()||'Calendrier 2026';
+      const json=await fetchGviz(sidCal, tab);
+      const parsed=parseCalendrier(json);
+      if(parsed.length>0){ renderTeam(parsed); ok++; }
+      else errors.push('Calendrier: aucun membre trouvé');
+    }catch(e){ errors.push('Calendrier: '+e.message); }
+  }
+
+  // ── PRÉPA PC ──
+  if(sidPc){
+    try{
+      const tab=document.getElementById('stab-pc').value.trim()||'Feuille 1';
+      await fetchGviz(sidPc, tab);
+      ok++;
+    }catch(e){ errors.push('PC: '+e.message); }
+  }
+
+  // ── AIRBUS — 3 onglets ──
+  if(sidAirbus){
+    const tabs=['REQUETES ENVOI','REQUETES ECRANS','REQUETES HCL'];
+    let allTickets=[];
+    for(const tab of tabs){
+      try{
+        const json=await fetchGviz(sidAirbus, tab);
+        const tickets=parseAirbusTab(json, tab);
+        allTickets=allTickets.concat(tickets);
+        ok++;
+      }catch(e){ errors.push(`Airbus/${tab}: `+e.message); }
+    }
+    if(allTickets.length>0) renderAirbusTickets(allTickets);
+  }
+
+  if(ok>0){
+    setStatus(`✅ Connecté — ${ok} onglet(s) synchronisés`+(errors.length?` · ⚠️ ${errors.join(' | ')}`:''),'cs-ok');
+    document.getElementById('btnSync').style.display='inline-block';
+    setupAutoRefresh();
+  } else {
+    setStatus('❌ Connexion échouée: '+errors.join(' | ')+' — Vérifie que le Sheet est partagé en lecture publique','cs-err');
+  }
+}
+
+// ── PARSE CALENDRIER — mois actuel uniquement ──
+// Structure du sheet: jour N = col (N-1)*2 + 1 (matin), col (N-1)*2 + 2 (aprem)
+// Ex: jour 6 → col 11 (matin), col 12 (aprem)
+function parseCalendrier(json){
+  const today=new Date();
+  const monthName=MOIS_FR[today.getMonth()];
+  const dayOfMonth=today.getDate();
+
+  // Colonnes pour aujourd'hui (base 0 dans le tableau gviz)
+  // Dans le sheet: col 1 = jour1 matin, col 2 = jour1 aprem, col 3 = jour2 matin...
+  // gviz retourne les colonnes dans l'ordre mais peut sauter les vides
+  // → on utilise le label de colonne pour trouver le bon index
+  const cols=json.table.cols||[];
+  const rows=json.table.rows||[];
+
+  // Trouver le bloc du mois courant
+  let monthBlockStart=-1, nameStart=-1;
+  for(let i=0;i<rows.length;i++){
+    const c=rows[i].c||[];
+    const v0=(c[0]&&c[0].v)?String(c[0].v).trim().toUpperCase():'';
+    if(v0.includes(monthName)){
+      monthBlockStart=i;
+      nameStart=i+8; // noms commencent 8 lignes après le header du mois
+      break;
+    }
+  }
+  if(monthBlockStart===-1) return [];
+
+  // Dans le sheet brut: col_matin = (jour-1)*2 + 1, col_aprem = (jour-1)*2 + 2
+  // gviz compresse les colonnes vides → on cherche dans la ligne des numéros de jour (monthBlockStart+7)
+  const dayNumRow=rows[monthBlockStart+7]||{c:[]};
+  let colMatin=-1, colAprem=-1;
+
+  // Chercher la colonne qui contient le numéro du jour actuel
+  (dayNumRow.c||[]).forEach((cell,idx)=>{
+    if(cell&&cell.v!=null){
+      const v=String(cell.v).trim();
+      if(v===String(dayOfMonth) && colMatin===-1) colMatin=idx;
+    }
+  });
+  if(colMatin>=0) colAprem=colMatin+1;
+
+  // Si gviz n'a pas la ligne des jours, calculer directement
+  if(colMatin===-1){
+    colMatin=(dayOfMonth-1)*2+1;
+    colAprem=colMatin+1;
+  }
+
+  const results=[];
+  const nextMonth=MOIS_FR[(today.getMonth()+1)%12];
+
+  for(let i=nameStart;i<rows.length;i++){
+    const c=rows[i].c||[];
+    const name=(c[0]&&c[0].v)?String(c[0].v).trim():'';
+    if(!name) continue;
+    const nameUp=name.toUpperCase();
+    if(nameUp.includes(nextMonth)||nameUp.includes('ZONE')||nameUp.includes('SEMAINE')||nameUp.includes('AVRIL')||nameUp.includes('MAI')) break;
+    // Ignorer les lignes non-noms
+    if(/^\d+$/.test(name)||name.match(/^[JVSLMDM]$/)) continue;
+
+    let matin='', aprem='';
+    if(colMatin>=0 && c[colMatin] && c[colMatin].v!=null) matin=String(c[colMatin].v).trim();
+    if(colAprem>=0 && c[colAprem] && c[colAprem].v!=null) aprem=String(c[colAprem].v).trim();
+
+    let status='present';
+    if(matin==='A' && aprem==='A') status='absent';
+    else if(matin==='A' || aprem==='A') status='demi';
+    else if(matin==='C' || aprem==='C') status='conge';
+    else if(matin==='T' || aprem==='T') status='terrain';
+    else if(matin==='V' || aprem==='V') status='vacances';
+
+    results.push({name, status, matin, aprem});
+  }
+  return results;
+}
+
+// ── PARSE DATE FRANÇAISE (même logique que n8n) ──
+function parseFrenchDateLoose(input){
+  const raw=(input||'').trim();
+  if(!raw) return null;
+  // dd/mm/yyyy ou dd/mm/yy
+  let m=raw.match(/(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4})/);
+  if(m){
+    const d=parseInt(m[1]),mo=parseInt(m[2]);
+    let y=parseInt(m[3]); if(y<100) y+=2000;
+    const dt=new Date(y,mo-1,d); dt.setHours(0,0,0,0);
+    return isNaN(dt)?null:dt;
+  }
+  // dd/mm sans année
+  m=raw.match(/(\d{1,2})[\/.-](\d{1,2})(?![\/.-]\d)/);
+  if(m){
+    const d=parseInt(m[1]),mo=parseInt(m[2]);
+    const y=new Date().getFullYear();
+    const dt=new Date(y,mo-1,d); dt.setHours(0,0,0,0);
+    return isNaN(dt)?null:dt;
+  }
+  return null;
+}
+
+// ── PARSE AIRBUS TAB ──
+function parseAirbusTab(json, tabName){
+  const rows=json.table.rows||[];
+  const cols=json.table.cols||[];
+  // Map column names to indices
+  const colIdx={};
+  cols.forEach((c,i)=>{ if(c.label) colIdx[c.label.trim()]=i; });
+
+  const iNum=colIdx['Number']??0;
+  const iPar=colIdx['Parent']??1;
+  const iState=colIdx['State']??2;
+  const iOpened=colIdx['Opened']??3;
+  const iShort=colIdx['Short description']??6;
+  const iReqFor=colIdx['Requested for']??7;
+  const iAddr=colIdx['Delivery address']??10;
+  const iRdv=colIdx['Appointment date']??11;
+
+  return rows.map(row=>{
+    const c=row.c||[];
+    const get=(i)=>(c[i]&&c[i].v!=null)?String(c[i].v).trim():'';
+    return {
+      num: get(iNum),
+      parent: get(iPar),
+      state: get(iState),
+      opened: get(iOpened),
+      short: get(iShort),
+      reqFor: get(iReqFor),
+      addr: get(iAddr),
+      rdv: get(iRdv),
+      tab: tabName
+    };
+  }).filter(r=>{
+    if(!r.num) return false;
+    const state=r.state.toLowerCase();
+    if(state.includes('closed complete')||state.includes('closed skipped')||state.includes('closed incomplete')) return false;
+    // Garder seulement si la date RDV est parseable (aujourd'hui ou demain)
+    const parsed = parseFrenchDateLoose(r.rdv);
+    if(!parsed) return false;
+    const today=new Date(); today.setHours(0,0,0,0);
+    const tomorrow=new Date(today); tomorrow.setDate(today.getDate()+1);
+    return parsed.getTime()===today.getTime() || parsed.getTime()===tomorrow.getTime();
+  });
+}
+
+// ── RENDER AIRBUS TICKETS — groupé par site + filtre cliquable ──
+let allAirbusTickets = [];
+let activeSiteFilter = 'tous';
+
+function normalizeSite(addr){
+  const a = addr.toLowerCase();
+  if(a.includes('saint-martin')||a.includes('saint martin')) return 'Saint-Martin';
+  if(a.includes('blagnac')) return 'Blagnac';
+  if(a.includes('toulouse')) return 'Toulouse';
+  if(a.includes('colomiers')) return 'Colomiers';
+  if(a.includes('piste vendee')||a.includes('piste vendée')||a.includes('m84')||a.includes('b43')) return 'Piste Vendée';
+  if(a.includes('lagardere')||a.includes('lagardère')||a.includes('l72')) return 'Lagardère';
+  if(a.includes('beauzelle')) return 'Beauzelle';
+  if(a.includes('cornebarrieu')) return 'Cornebarrieu';
+  if(a.includes('nantes')||a.includes('nantes')) return 'Nantes';
+  // Fallback: take first meaningful word
+  const parts = addr.split(/[\/|,]/);
+  return parts[0].trim() || 'Autre';
+}
+
+function filterSite(site){
+  activeSiteFilter = site;
+  document.querySelectorAll('.sf-btn').forEach(b=>b.classList.remove('sf-on'));
+  const btn = document.getElementById('sf-'+site.replace(/[^a-z0-9]/gi,'-'));
+  if(btn) btn.classList.add('sf-on');
+  renderAirbusTable(allAirbusTickets);
+}
+
+function renderAirbusTickets(tickets){
+  allAirbusTickets = tickets;
+  const today=new Date(); today.setHours(0,0,0,0);
+  const tomorrow=new Date(today); tomorrow.setDate(today.getDate()+1);
+
+  const withDates=tickets.map(t=>({...t, parsedDate:parseFrenchDateLoose(t.rdv)}));
+  const rdvToday=withDates.filter(t=>t.parsedDate&&t.parsedDate.getTime()===today.getTime());
+  const rdvTomorrow=withDates.filter(t=>t.parsedDate&&t.parsedDate.getTime()===tomorrow.getTime());
+
+  const allShown=[...rdvToday,...rdvTomorrow];
+  document.getElementById('kv-tickets').textContent=rdvToday.length;
+
+  // Build site list from all shown tickets
+  const sites=['tous',...[...new Set(allShown.map(t=>normalizeSite(t.addr)))].sort()];
+
+  // Rebuild filter buttons
+  const filterDiv=document.getElementById('site-filters');
+  filterDiv.innerHTML=`<span style="font-size:.7rem;color:var(--muted);font-weight:600;letter-spacing:.5px">SITE :</span>`
+    +sites.map(s=>{
+      const id='sf-'+s.replace(/[^a-z0-9]/gi,'-');
+      const label=s==='tous'?`Tous (${allShown.length})`:s;
+      return `<button onclick="filterSite('${s}')" class="sf-btn${s===activeSiteFilter?' sf-on':''}" id="${id}">${label}</button>`;
+    }).join('');
+
+  allAirbusTickets=[...rdvToday,...rdvTomorrow];
+  renderAirbusTable(allAirbusTickets);
+  renderAirbusStats(tickets); // stats sur TOUS les tickets (pas seulement RDV du jour)
+}
+
+function renderAirbusStats(tickets){
+  if(!tickets||tickets.length===0) return;
+  document.getElementById('airbus-stats').style.display='block';
+
+  const now=new Date();
+  const thisMonth=now.getMonth();
+  const thisYear=now.getFullYear();
+  const lastMonth=thisMonth===0?11:thisMonth-1;
+  const lastYear=thisMonth===0?thisYear-1:thisYear;
+
+  // ── 1. CE MOIS VS MOIS DERNIER ──
+  const moisFR=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+  function parseOpened(str){
+    if(!str) return null;
+    // format: "29/08/2025" or "2025-08-29"
+    let m=str.match(/(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4})/);
+    if(m){ const y=parseInt(m[3])<100?parseInt(m[3])+2000:parseInt(m[3]); return new Date(y,parseInt(m[2])-1,parseInt(m[1])); }
+    m=str.match(/(\d{4})-(\d{2})-(\d{2})/);
+    if(m) return new Date(parseInt(m[1]),parseInt(m[2])-1,parseInt(m[3]));
+    return null;
+  }
+
+  let countThis=0, countLast=0;
+  tickets.forEach(t=>{
+    const d=parseOpened(t.opened||'');
+    if(!d) return;
+    if(d.getMonth()===thisMonth&&d.getFullYear()===thisYear) countThis++;
+    if(d.getMonth()===lastMonth&&d.getFullYear()===lastYear) countLast++;
+  });
+
+  const maxBar=Math.max(countThis,countLast,1);
+  const barColors=['var(--blue)','var(--muted)'];
+  const barData=[[countLast,moisFR[lastMonth]],[countThis,moisFR[thisMonth]]];
+  document.getElementById('stat-mois-bars').innerHTML=barData.map(([v,l],i)=>`
+    <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1">
+      <span style="font-size:.72rem;font-weight:800;color:${i===1?'var(--blue)':'var(--muted)'}">${v}</span>
+      <div style="width:100%;max-width:40px;height:${Math.round(v/maxBar*60)+4}px;background:${i===1?'var(--blue)':'var(--border)'};border-radius:4px 4px 0 0;transition:height .3s"></div>
+    </div>`).join('');
+  document.getElementById('stat-mois-labels').innerHTML=barData.map(([v,l],i)=>
+    `<span style="flex:1;text-align:center;font-weight:${i===1?700:400}">${l}</span>`).join('');
+
+  // ── 2. RÉPARTITION PAR ONGLET ──
+  const ongletColors={'REQUETES ENVOI':'var(--blue)','REQUETES ECRANS':'var(--purple)','REQUETES HCL':'var(--orange)'};
+  const ongletCount={};
+  tickets.forEach(t=>{ ongletCount[t.tab]=(ongletCount[t.tab]||0)+1; });
+  const total=tickets.length;
+  document.getElementById('stat-onglets').innerHTML=Object.entries(ongletCount)
+    .sort((a,b)=>b[1]-a[1])
+    .map(([tab,count])=>{
+      const pct=Math.round(count/total*100);
+      const color=ongletColors[tab]||'var(--blue)';
+      const label=tab.replace('REQUETES ','');
+      return `<div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+          <span style="font-size:.68rem;font-weight:700;color:${color}">${label}</span>
+          <span style="font-size:.68rem;color:var(--muted)">${count} (${pct}%)</span>
+        </div>
+        <div style="background:var(--border);border-radius:4px;height:6px">
+          <div style="background:${color};width:${pct}%;height:6px;border-radius:4px;transition:width .4s"></div>
+        </div>
+      </div>`;
+    }).join('');
+
+  // ── 3. PAR SITE ──
+  const siteCount={};
+  tickets.forEach(t=>{ const s=normalizeSite(t.addr); siteCount[s]=(siteCount[s]||0)+1; });
+  const maxSite=Math.max(...Object.values(siteCount),1);
+  document.getElementById('stat-sites').innerHTML=Object.entries(siteCount)
+    .sort((a,b)=>b[1]-a[1]).slice(0,7)
+    .map(([site,count])=>{
+      const pct=Math.round(count/maxSite*100);
+      return `<div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:2px">
+          <span style="font-size:.65rem;font-weight:600;color:var(--text)">${site}</span>
+          <span style="font-size:.65rem;color:var(--muted);font-weight:700">${count}</span>
+        </div>
+        <div style="background:var(--border);border-radius:3px;height:5px">
+          <div style="background:var(--green);width:${pct}%;height:5px;border-radius:3px;transition:width .4s"></div>
+        </div>
+      </div>`;
+    }).join('');
+}
+
+function renderAirbusTable(tickets){
+  const today=new Date(); today.setHours(0,0,0,0);
+  const tomorrow=new Date(today); tomorrow.setDate(today.getDate()+1);
+  const tabColors={'REQUETES ENVOI':'var(--blue)','REQUETES ECRANS':'var(--purple)','REQUETES HCL':'var(--orange)'};
+
+  // Apply site filter
+  const filtered = activeSiteFilter==='tous' ? tickets
+    : tickets.filter(t=>normalizeSite(t.addr)===activeSiteFilter);
+
+  function renderRow(t, isToday){
+    const tabColor=tabColors[t.tab]||'var(--blue)';
+    const site=t.addr.length>28?t.addr.substring(0,28)+'…':t.addr;
+    return `<tr style="${isToday?'background:var(--green-l)':''}">
+      <td>
+        <span class="tn">${t.num}</span>
+        <div style="font-size:.62rem;color:var(--muted);margin-top:2px">${t.parent}</div>
+        <div style="margin-top:3px"><span style="font-size:.58rem;font-weight:700;padding:1px 5px;border-radius:3px;background:${tabColor}18;color:${tabColor}">${t.tab}</span></div>
+      </td>
+      <td style="font-weight:500;font-size:.8rem">${t.short||'—'}</td>
+      <td style="font-size:.76rem">${t.reqFor||'—'}</td>
+      <td style="font-size:.72rem;color:var(--muted)" title="${t.addr}">${site}</td>
+      <td>${isToday
+        ?`<span style="background:var(--green-l);color:var(--green);font-weight:700;font-size:.72rem;padding:4px 8px;border-radius:6px;border:1px solid var(--green)40">📅 AUJOURD'HUI</span><div style="font-size:.7rem;color:var(--text);margin-top:3px">${t.rdv}</div>`
+        :`<span style="font-size:.72rem;color:var(--muted)">${t.rdv||'—'}</span>`
+      }</td>
+      <td><span class="state-open" style="font-size:.62rem">${t.state}</span></td>
+    </tr>`;
+  }
+
+  // Group by site
+  const byToday = filtered.filter(t=>t.parsedDate&&t.parsedDate.getTime()===today.getTime());
+  const byTomorrow = filtered.filter(t=>t.parsedDate&&t.parsedDate.getTime()===tomorrow.getTime());
+
+  // Group each by site
+  function groupBySite(list){
+    const map = new Map();
+    list.forEach(t=>{
+      const s=normalizeSite(t.addr);
+      if(!map.has(s)) map.set(s,[]);
+      map.get(s).push(t);
+    });
+    return map;
+  }
+
+  let html='';
+
+  if(byToday.length>0){
+    html+=`<tr><td colspan="6" style="padding:6px 8px;background:var(--green);color:white;font-family:var(--font-c);font-size:.68rem;font-weight:700;letter-spacing:1.5px">📅 RDV AUJOURD'HUI — ${byToday.length} ticket(s)</td></tr>`;
+    const grouped=groupBySite(byToday);
+    grouped.forEach((rows, site)=>{
+      if(grouped.size>1) html+=`<tr><td colspan="6" style="padding:4px 12px;background:var(--panel2);font-size:.68rem;font-weight:700;color:var(--blue);letter-spacing:.5px">📍 ${site} (${rows.length})</td></tr>`;
+      html+=rows.map(t=>renderRow(t,true)).join('');
+    });
+  }
+
+  if(byTomorrow.length>0){
+    html+=`<tr><td colspan="6" style="padding:6px 8px;background:var(--blue);color:white;font-family:var(--font-c);font-size:.68rem;font-weight:700;letter-spacing:1.5px">📅 RDV DEMAIN — ${byTomorrow.length} ticket(s)</td></tr>`;
+    const grouped=groupBySite(byTomorrow);
+    grouped.forEach((rows, site)=>{
+      if(grouped.size>1) html+=`<tr><td colspan="6" style="padding:4px 12px;background:var(--panel2);font-size:.68rem;font-weight:700;color:var(--blue);letter-spacing:.5px">📍 ${site} (${rows.length})</td></tr>`;
+      html+=rows.map(t=>renderRow(t,false)).join('');
+    });
+  }
+
+  if(!html){
+    html=`<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted);font-size:.85rem">✅ Aucun RDV ${activeSiteFilter!=='tous'?'sur ce site ':''} aujourd'hui ni demain</td></tr>`;
+  }
+
+  document.getElementById('tb-airbus').innerHTML=html;
+}
+
+function setStatus(msg,cls){
+  const el=document.getElementById('cpStatus');
+  el.textContent=msg;
+  el.className='cp-status '+cls;
+}
+
+async function refreshAll(){
+  const sidCal=document.getElementById('sid-cal').value.trim();
+  if(sidCal) await connectSheets();
+  else loadDemo();
+}
+
+function setupAutoRefresh(){
+  if(refreshTimer) clearInterval(refreshTimer);
+  const ms=parseInt(document.getElementById('srefresh').value);
+  if(ms>0) refreshTimer=setInterval(refreshAll, ms);
+}
+
+// ═══════════════════════════════════════════
+// DEMO MODE
+// ═══════════════════════════════════════════
+function loadDemo(){
+  renderTeam(TEAM_TODAY);
+  renderTickets();
+  renderPC();
+  renderPriorities();
+  setStatus('✅ Données réelles chargées (6 mars 2026) — 25 présents · 2 absents · 4 vacances · 2 tickets Airbus ouverts','cs-ok');
+  document.getElementById('btnSync').style.display='inline-block';
+}
+
+// ═══════════════════════════════════════════
+// TRELLO
+// ═══════════════════════════════════════════
+const TRELLO_BOARD_ID = 'opCmnOnM';
+
+// Couleurs étiquettes Trello → CSS
+const LABEL_COLORS = {
+  green:  {bg:'#e0faf3', color:'#00c48c', border:'#00c48c'},
+  yellow: {bg:'#fefce8', color:'#ca8a04', border:'#eab308'},
+  orange: {bg:'#fff3e0', color:'#ff8c00', border:'#ff8c00'},
+  red:    {bg:'#ffe8ec', color:'#ff3b5c', border:'#ff3b5c'},
+  purple: {bg:'#ede9fe', color:'#7c3aed', border:'#7c3aed'},
+  blue:   {bg:'#e8edff', color:'#1a56ff', border:'#1a56ff'},
+  sky:    {bg:'#e0f2fe', color:'#0284c7', border:'#0284c7'},
+  lime:   {bg:'#f0fdf4', color:'#16a34a', border:'#16a34a'},
+  pink:   {bg:'#fdf2f8', color:'#db2777', border:'#db2777'},
+  black:  {bg:'#f1f5f9', color:'#1a2333', border:'#64748b'},
+};
+
+// Jours à afficher dans le planning (ordre des colonnes)
+const COLS_VISIBLES = ['EN COURS','LUNDI','MARDI','MERCREDI','JEUDI','VENDREDI'];
+const JOUR_ORDER = ['EN COURS','LUNDI','MARDI','MERCREDI','JEUDI','VENDREDI'];
+
+async function loadTrello() {
+  document.getElementById('trelloMeta').textContent = 'Connexion en cours...';
+  document.getElementById('trelloBoard').innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:24px;color:var(--muted)"><div style="width:24px;height:24px;border:2px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 8px"></div>Chargement Trello...</div>`;
+
+  try {
+    // Fetch lists
+    const listsRes = await fetch(`https://api.trello.com/1/boards/${TRELLO_BOARD_ID}/lists?fields=name,id`);
+    if (!listsRes.ok) throw new Error('Board inaccessible (vérifie que le board est public)');
+    const lists = await listsRes.json();
+
+    // Fetch cards with labels and members
+    const cardsRes = await fetch(`https://api.trello.com/1/boards/${TRELLO_BOARD_ID}/cards?fields=name,desc,due,labels,idList,idMembers,cover&members=true`);
+    const cards = await cardsRes.json();
+
+    // Fetch members
+    const membersRes = await fetch(`https://api.trello.com/1/boards/${TRELLO_BOARD_ID}/members?fields=fullName,initials,avatarColor`);
+    const members = await membersRes.json();
+    const memberMap = {};
+    members.forEach(m => { memberMap[m.id] = m; });
+
+    renderTrelloBoard(lists, cards, memberMap);
+    document.getElementById('trelloMeta').textContent = `Plannification Envoi · ${lists.length} listes · ${cards.length} cartes`;
+    document.getElementById('trelloUpd').textContent = 'Dernière synchro Trello : ' + new Date().toLocaleTimeString('fr-FR');
+
+  } catch(e) {
+    document.getElementById('trelloBoard').innerHTML = `<div style="grid-column:1/-1;background:var(--red-l);border:1px solid var(--red);border-radius:8px;padding:16px;color:var(--red);font-size:.82rem">❌ Erreur : ${e.message}</div>`;
+    document.getElementById('trelloMeta').textContent = 'Erreur de connexion';
+  }
+}
+
+function renderTrelloBoard(lists, cards, memberMap) {
+  // Sort lists by Trello order, but put known day lists in logical order
+  const dayOrder = ['EN COURS','LUNDI','MARDI','MERCREDI','JEUDI','VENDREDI','TERMINÉ','TERMINÉ ✓'];
+  const sorted = [...lists].sort((a, b) => {
+    const ia = dayOrder.findIndex(d => a.name.toUpperCase().includes(d));
+    const ib = dayOrder.findIndex(d => b.name.toUpperCase().includes(d));
+    if (ia === -1 && ib === -1) return 0;
+    if (ia === -1) return 1;
+    if (ib === -1) return -1;
+    return ia - ib;
+  });
+
+  // Filter: only show desired columns
+  const filtered = sorted.filter(l => COLS_VISIBLES.some(cv => l.name.toUpperCase().includes(cv)));
+
+  // Build legend from all unique labels
+  const allLabels = {};
+  cards.forEach(c => c.labels.forEach(l => {
+    if (l.name) allLabels[l.name] = l.color;
+  }));
+  document.getElementById('trelloLegend').innerHTML = '';
+
+  // Build columns
+  const colsHtml = filtered.map(list => {
+    const listCards = cards.filter(c => c.idList === list.id);
+    const isToday = isTodayList(list.name);
+    const isDone = list.name.toUpperCase().includes('TERMINÉ');
+    const headerColor = isToday ? 'var(--blue)' : isDone ? 'var(--green)' : 'var(--text)';
+    const headerBg = isToday ? 'var(--blue-l)' : isDone ? 'var(--green-l)' : 'var(--panel2)';
+
+    const cardsHtml = listCards.map(card => renderTrelloCard(card, memberMap)).join('');
+
+    return `
+    <div style="min-width:0">
+      <div style="background:${headerBg};border-radius:8px;padding:7px 10px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
+        <span style="font-family:var(--font-c);font-size:.78rem;font-weight:700;letter-spacing:1px;color:${headerColor};text-transform:uppercase">${list.name}</span>
+        <span style="font-size:.68rem;background:white;color:var(--muted);padding:1px 7px;border-radius:10px;font-weight:600">${listCards.length}</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">${cardsHtml || '<div style="font-size:.72rem;color:var(--muted);text-align:center;padding:10px">Vide</div>'}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('trelloBoard').innerHTML = colsHtml;
+}
+
+function renderTrelloCard(card, memberMap) {
+  // Labels
+  const labelsHtml = card.labels.map(l => {
+    const c = LABEL_COLORS[l.color] || LABEL_COLORS.black;
+    return `<span style="font-size:.58rem;font-weight:700;padding:2px 6px;border-radius:3px;background:${c.bg};color:${c.color};white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis;display:block">${l.name||''}</span>`;
+  }).join('');
+
+  // Due date
+  let dueHtml = '';
+  if (card.due) {
+    const due = new Date(card.due);
+    const now = new Date();
+    const diff = Math.ceil((due - now) / 86400000);
+    const dc = diff < 0 ? 'var(--red)' : diff <= 2 ? 'var(--orange)' : 'var(--muted)';
+    const dLabel = diff < 0 ? `⚠️ ${due.toLocaleDateString('fr-FR',{day:'numeric',month:'short'})}` : due.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+    dueHtml = `<div style="font-size:.65rem;color:${dc};font-weight:600;margin-top:4px">🗓 ${dLabel}</div>`;
+  }
+
+  // Members
+  const membersHtml = card.idMembers.map(id => {
+    const m = memberMap[id];
+    if (!m) return '';
+    const colors = ['#1a56ff','#7c3aed','#00c48c','#ff8c00','#ff3b5c'];
+    const col = colors[m.fullName.charCodeAt(0) % colors.length];
+    return `<div title="${m.fullName}" style="width:20px;height:20px;border-radius:50%;background:${col}22;color:${col};display:flex;align-items:center;justify-content:center;font-size:.58rem;font-weight:700;border:1.5px solid ${col}44">${m.initials||m.fullName.substring(0,2).toUpperCase()}</div>`;
+  }).join('');
+
+  return `
+  <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:9px 10px;transition:box-shadow .15s;cursor:default" onmouseover="this.style.boxShadow='0 3px 12px rgba(0,0,0,.08)'" onmouseout="this.style.boxShadow='none'">
+    <div style="display:flex;flex-direction:column;gap:3px;margin-bottom:5px">${labelsHtml}</div>
+    <div style="font-size:.78rem;font-weight:600;line-height:1.3;margin-bottom:4px">${card.name}</div>
+    ${dueHtml}
+    ${membersHtml ? `<div style="display:flex;gap:3px;margin-top:5px;flex-wrap:wrap">${membersHtml}</div>` : ''}
+  </div>`;
+}
+
+function isTodayList(name) {
+  const jours = ['DIMANCHE','LUNDI','MARDI','MERCREDI','JEUDI','VENDREDI','SAMEDI'];
+  const today = jours[new Date().getDay()];
+  return name.toUpperCase().includes(today);
+}
+
+// ═══════════════════════════════════════════
+// CONFIG GOOGLE SHEETS - PRÉPARATION
+// ═══════════════════════════════════════════
+const GOOGLE_SHEETS_CONFIG = {
+  ABSENCE_PRESENCE: '1DuJiNC109RGAMu90YbB6huiRvpVih9Sn',
+  ENVOI_PREPARATION: '1b-sIgS2Dxg86HO_jsfl07mCweiQ048RH58kYX07veMk'
+};
+
+// ═══════════════════════════════════════════
+// AUTO-LOAD GOOGLE SHEETS
+// ═══════════════════════════════════════════
+async function autoLoadGoogleSheets() {
+  try {
+    // Charge depuis Google Sheets au lieu de démo
+    const sidCal = GOOGLE_SHEETS_CONFIG.ABSENCE_PRESENCE;
+    document.getElementById('sid-cal').value = sidCal;
+    await connectSheets();
+  } catch(e) {
+    console.error('Erreur chargement Sheets:', e);
+    loadDemo();
+  }
+}
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+renderCharts();
+autoLoadGoogleSheets();  // Charge depuis Google Sheets automatiquement
+loadTrello();
+// Refresh Trello every 2 minutes
+setInterval(loadTrello, 120000);
+// Refresh Google Sheets every 5 minutes
+setInterval(autoLoadGoogleSheets, 300000);
+</script>
+</body>
+</html>
